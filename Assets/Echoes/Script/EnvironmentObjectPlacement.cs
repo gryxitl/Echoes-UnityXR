@@ -98,7 +98,6 @@ namespace Meta.XR.MRUtilityKit
         private void BindRoomInfo(MRUKRoom room)
         {
             currentRoom = room;
-            SpawnInitObjectOnKeyWall();
 
         }
         private void RecenterPanel()
@@ -166,7 +165,7 @@ namespace Meta.XR.MRUtilityKit
                 _panel.transform.SetParent(hitAnchor.transform);
                 _panel.SetLocalPositionAndRotation(Vector3.zero, quaternion.identity);
 
-
+//START SHIT BACK UP
                 // var snapPose = TryGetEnvironmentPose();
                 // Pose myPose = new Pose();
                 // if (snapPose.HasValue)
@@ -177,8 +176,14 @@ namespace Meta.XR.MRUtilityKit
                 _targetPose.position = _panel.position;
                 _targetPose.rotation = _panel.rotation;
 
+                SpawnInitObjectOnKeyWall();
             }
             // AnimatePanelPose();
+        }
+
+        private void SpawnobjectOnTargetWall()
+        {
+
         }
 
         private void SpawnInitObjectOnKeyWall()

@@ -5,15 +5,29 @@ using UnityEngine;
 
 using Meta.Net.NativeWebSocket;
 using LearnXR.Core.Utilities;
+using OVRSimpleJSON;
+using System.Linq;
+using System.Text;
 public class Connection : MonoBehaviour
 {
     WebSocket websocket;
     [SerializeField] private Renderer targetRenderer;
 
         [SerializeField] private SpatialLogger logger;
+
+        [SerializeField] private TextAsset jsonObj;
+        private List<string> messages = new List<string>();
+        private string lastMessage;
+
+        private StringBuilder messageBuffer = new StringBuilder();
+
+
     // Start is called before the first frame update
     async void Start()
     {
+
+        // TextToImage(jsonObj);
+
         // websocket = new WebSocket("ws://localhost:3000");
         websocket = new WebSocket("ws://192.168.137.1:9982");
 
@@ -35,15 +49,27 @@ public class Connection : MonoBehaviour
             websocket.OnMessage += (bytes, offset, count) =>
         {
             Debug.Log("OnMessage!");
-            string message = System.Text.Encoding.UTF8.GetString(bytes, offset, count);
-            Debug.Log("Message received: " + message);
-            logger.LogInfo(message);
+            string messagePart = System.Text.Encoding.UTF8.GetString(bytes, offset, count);
+            Debug.Log("Message received: " + messagePart);
+
+            messageBuffer.Append(messagePart);
+
+            if (IsMessageComplete(messageBuffer.ToString()))
+            {
+              string completeMessage = messageBuffer.ToString();
+
+             Debug.Log("Complete message received: " + completeMessage); 
+
+                     messageBuffer.Clear();
+
+            messages.Add(completeMessage);
+            }
+
+            // logger.LogInfo(message);
             // getting the message as a string
             // var message = System.Text.Encoding.UTF8.GetString(bytes);
             // Debug.Log("OnMessage! " + message);
-            // ImageMSG msg = new ImageMSG(); 
-            // msg = ImgMsgDecode(message);
-            // JsonToImage(msg);
+            // ImgMsgDecode(message);
         };
 
         // Keep sending messages at every 0.3s
@@ -51,13 +77,23 @@ public class Connection : MonoBehaviour
 
         // waiting for messages
         await websocket.Connect();
+
     }
 
+private bool IsMessageComplete(string message)
+{
+    return message.EndsWith("}");
+}
     void Update()
     {
 #if !UNITY_WEBGL || UNITY_EDITOR
         // websocket.DispatchMessageQueue();
 #endif
+    if (Input.GetKeyDown(KeyCode.Space))
+    {
+        StartCoroutine(DecodeImage());   
+    }
+
     }
 
     // async void SendWebSocketMessage()
@@ -91,14 +127,13 @@ public class Connection : MonoBehaviour
         Debug.Log($"Sent: {jsonString}");
     }
 
-    public ImageMSG ImgMsgDecode(string msg)
+    public void ImgMsgDecode(string msg)
     {
-        ImageMSG myMsg = new ImageMSG();
-        myMsg = JsonUtility.FromJson<ImageMSG>(msg);
-        return myMsg;
+        ImageMSG myMsg = JsonUtility.FromJson<ImageMSG>(msg);
+        StringToImage(myMsg);
     }
 
-    public void JsonToImage(ImageMSG msg)
+    public void StringToImage(ImageMSG msg)
     {
         try {
 
@@ -115,11 +150,23 @@ public class Connection : MonoBehaviour
             }
     }
 
+    public void TextToImage(TextAsset text)
+    {
+        ImageMSG mymsg = JsonUtility.FromJson<ImageMSG>(text.text);
+        StringToImage(mymsg);
+    }
+
     private async void OnApplicationQuit()
     {
         await websocket.Close();
     }
 
+    IEnumerator DecodeImage()
+    {
+        //TextToImage(jsonObj);
+            ImgMsgDecode(messages[messages.Count - 1]);
+        yield return 0;
+    }
 
 
 }
