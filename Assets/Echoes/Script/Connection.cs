@@ -37,7 +37,7 @@ public class Connection : MonoBehaviour
             Debug.Log("OnMessage!");
             string message = System.Text.Encoding.UTF8.GetString(bytes, offset, count);
             Debug.Log("Message received: " + message);
-            //logger.LogInfo(message);
+            logger.LogInfo(message);
             // getting the message as a string
             // var message = System.Text.Encoding.UTF8.GetString(bytes);
             // Debug.Log("OnMessage! " + message);
