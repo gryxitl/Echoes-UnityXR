@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Image Loader Test</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: black;
+            font-family: Arial, sans-serif;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        #app {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        #connectionStatus {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            font-size: 16px;
+            z-index: 1001;
+        }
+        #connectButton {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px 40px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 24px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            z-index: 1000;
+            touch-action: manipulation;
+        }
+        #connectButton:active {
+            background-color: #45a049;
+        }
+        #photoBooth {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .image-grid {
+            flex-grow: 1;
+            display: grid;
+            width: 100%;
+            height: 100%;
+            gap: 10px;
+            padding: 10px;
+        }
+        /* Portrait Orientation */
+        @media screen and (orientation: portrait) {
+            .image-grid {
+                grid-template-columns: 1fr 1fr;
+                grid-template-rows: 1fr 1fr 1fr;
+                grid-template-areas: 
+                    "img1 img2"
+                    "img1 img2"
+                    "img3 img3"
+                    "img4 img4";
+            }
+            #dynamic-image-1 { grid-area: img1; }
+            #dynamic-image-2 { grid-area: img2; }
+            #dynamic-image-3 { grid-area: img3; }
+            #dynamic-image-4 { grid-area: img4; }
+        }
+        
+        /* Landscape Orientation */
+        @media screen and (orientation: landscape) {
+            .image-grid {
+                grid-template-columns: 1fr 1fr 1fr;
+                grid-template-rows: 1fr;
+            }
+        }
+        
+        .image-container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #222;
+            border: 2px solid white;
+            overflow: hidden;
+        }
+        .image-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        #imageSelector {
+            width: 100%;
+            padding: 10px;
+            background-color: #333;
+            color: white;
+            text-align: center;
+        }
+        .slide-selector {
+            width: 100%;
+            padding: 10px;
+            background-color: #333;
+            color: white;
+            text-align: center;
+        }
+        .slide-slider {
+            width: 100%;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div id="connectionStatus">Status: Not Connected</div>
+        <button id="connectButton">Touch to Begin</button>
+        <div id="imageSelector" class="slide-selector">
+            <input type="range" class="slide-slider" id="imageSlider" min="1" max="4" value="1">
+            <div id="selectedImageDisplay">Selected Image: 1</div>
+        </div>
+        <div id="speedSelector" class="slide-selector">
+            <input type="range" class="slide-slider" id="speedSlider" min="0" max="300" value="0.01">
+            <div id="selectedSpeedDisplay">Selected Speed: 1</div>
+        </div>
+        <div id="photoBooth">
+            <div class="image-grid">
+                <div id="image-container-1" class="image-container">
+                    <img id="dynamic-image-1" src="" alt="Image 1">
+                </div>
+                <div id="image-container-2" class="image-container">
+                    <img id="dynamic-image-2" src="" alt="Image 2">
+                </div>
+                <div id="image-container-3" class="image-container">
+                    <img id="dynamic-image-3" src="" alt="Image 3">
+                </div>
+                <div id="image-container-4" class="image-container">
+                    <img id="dynamic-image-4" src="" alt="Image 4">
+                </div>
+            </div>
+            
+            
+        </div>
+    </div>
+
+    <script>
+        let socket = null;
+        const connectButton = document.getElementById('connectButton');
+        const connectionStatus = document.getElementById('connectionStatus');
+        const imageSlider = document.getElementById('imageSlider');
+        const speedSlider = document.getElementById('speedSlider');
+        const selectedImageDisplay = document.getElementById('selectedImageDisplay');
+        const selectedSpeedDisplay = document.getElementById('selectedSpeedDisplay');
+
+        // Function to update a specific image
+        function updateImage(imageId, base64Data) {
+            const imgElement = document.getElementById(`dynamic-image-${imageId}`);
+            
+            if (!imgElement) return;
+
+            // Check if the base64 data is already a complete data URL
+            if (base64Data.startsWith('data:image')) {
+                imgElement.src = base64Data;
+            } else {
+                // If it's just the base64 encoded data, create a data URL
+                imgElement.src = `data:image/jpeg;base64,${base64Data}`;
+            }
+        }
+
+        // Function to send selected image ID to WebSocket
+        function sendSelectedImageId(imageId) {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                const message = JSON.stringify({
+                    type: 'imageSelection',
+                    imageId: imageId,
+                    timestamp: new Date().toISOString()
+                });
+                socket.send(message);
+            }
+        }
+
+        // Function to send selected image ID to WebSocket
+        function sendSelectedSpeedId(speedId) {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                const message = JSON.stringify({
+                    type: 'speedSelection',
+                    speedId: speedId,
+                    timestamp: new Date().toISOString()
+                });
+                socket.send(message);
+            }
+        }
+
+        // WebSocket connection for receiving image updates
+        function setupWebSocket() {
+            socket = new WebSocket('ws://{IP_ADDRESS}:9982');
+            
+            socket.onopen = function(event) {
+                console.log('WebSocket connection established');
+                connectionStatus.textContent = 'Status: Connected';
+                
+                // Send "connected" message with timestamp
+                const connectionMessage = JSON.stringify({
+                    type: 'connection',
+                    message: 'connected',
+                    timestamp: new Date().toISOString()
+                });
+                
+                socket.send(connectionMessage);
+                
+                // Hide connect button after successful connection
+                connectButton.style.display = 'none';
+            };
+
+            socket.onmessage = function(event) {
+                try {
+                    // Try parsing the message as JSON first
+                    const parsedData = JSON.parse(event.data);
+                    
+                    // Check if the message contains image data and an image ID
+                    if (parsedData.imageData && parsedData.imageId) {
+                        updateImage(parsedData.imageId, parsedData.imageData);
+                    }
+                } catch (jsonError) {
+                    // If JSON parsing fails, log the error
+                    console.error('Error parsing message:', jsonError);
+                }
+            };
+
+            socket.onerror = function(error) {
+                console.error('WebSocket Error:', error);
+                connectionStatus.textContent = 'Status: Connection Error';
+                reconnectWebSocket();
+            };
+
+            socket.onclose = function(event) {
+                console.log('WebSocket connection closed');
+                connectionStatus.textContent = 'Status: Disconnected';
+                reconnectWebSocket();
+            };
+        }
+
+        // Reconnection function with automatic retry
+        function reconnectWebSocket() {
+            // Show connect button again
+            connectButton.style.display = 'block';
+            connectButton.textContent = 'Reconnect';
+        }
+
+        // Fallback method for TouchDesigner DAT text input
+        function updateFromDAT(imageId, base64Image) {
+            updateImage(imageId, base64Image);
+        }
+
+        // Event listener for connect button
+        connectButton.addEventListener('click', function() {
+            // Prevent multiple connections
+            if (!socket || socket.readyState !== WebSocket.OPEN) {
+                setupWebSocket();
+            }
+        });
+
+        // Event listener for image slider
+        imageSlider.addEventListener('input', function() {
+            const selectedImageId = this.value;
+            selectedImageDisplay.textContent = `Selected Image: ${selectedImageId}`;
+            sendSelectedImageId(selectedImageId);
+        });
+
+        // Event listener for image slider
+        speedSlider.addEventListener('input', function() {
+            const selectedSpeedId = this.value;
+            selectedSpeedDisplay.textContent = `Selected Speed: ${selectedSpeedId}`;
+            sendSelectedSpeedId(selectedSpeedId);
+        });
+
+        // Expose updateFromDAT to global scope for TouchDesigner DAT
+        window.updateFromDAT = updateFromDAT;
+
+        // Handle orientation changes
+        window.addEventListener('orientationchange', function() {
+            // Force a reflow
+            document.body.style.display = 'none';
+            document.body.offsetHeight; // no need to store this anywhere, just trigger reflow
+            document.body.style.display = '';
+        });
+    </script>
+</body>
+</html>
