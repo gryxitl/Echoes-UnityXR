@@ -1,0 +1,2 @@
+/Users/costas/Documents/Projects/UnityProjects/Echoes-UnityXR/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/src/main/cpp/CMakeLists.txt
+/Users/costas/Documents/Projects/UnityProjects/Echoes-UnityXR/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/src/main/cpp/GameActivity/CMakeLists.txt
