@@ -98,6 +98,7 @@ namespace Meta.XR.MRUtilityKit
         private void BindRoomInfo(MRUKRoom room)
         {
             currentRoom = room;
+            SpawnInitObjectOnKeyWall();
 
         }
         private void RecenterPanel()
@@ -175,10 +176,21 @@ namespace Meta.XR.MRUtilityKit
                 // _panel.SetPositionAndRotation(envRay.point, myPose.rotation);
                 _targetPose.position = _panel.position;
                 _targetPose.rotation = _panel.rotation;
+
             }
             // AnimatePanelPose();
         }
 
+        private void SpawnInitObjectOnKeyWall()
+        {
+                var wallScale = Vector2.zero;
+                var keyWall = MRUK.Instance?.GetCurrentRoom()?.GetKeyWall(out wallScale);
+                GameObject go = Instantiate(spawnable, Vector3.zero, Quaternion.identity, keyWall.transform);
+
+                go.transform.SetLocalPositionAndRotation(Vector3.zero, quaternion.identity);
+
+
+        }
         private Ray GetRaycastRay()
         {
             return new Ray(_raycastAnchor.position + _raycastAnchor.forward * 0.1f, _raycastAnchor.forward);
