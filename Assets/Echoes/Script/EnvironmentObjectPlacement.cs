@@ -202,6 +202,8 @@ namespace Meta.XR.MRUtilityKit
         {
                 var wallScale = Vector2.zero;
                 var keyWall = MRUK.Instance?.GetCurrentRoom()?.GetKeyWall(out wallScale);
+                logger.LogInfo($"keywall name{keyWall.name}");
+                scanObject.transform.parent = keyWall.transform;
                 scanObject.transform.SetLocalPositionAndRotation(Vector3.zero, quaternion.identity);
 
         }        private Ray GetRaycastRay()
