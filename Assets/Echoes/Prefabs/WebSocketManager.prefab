@@ -44,3 +44,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e627fdb22191643ccb8736ddd64cba06, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  targetRenderer: {fileID: 0}
+  logger: {fileID: 0}
+  jsonObj: {fileID: 4900000, guid: a7f09134f58d8453490f7799b62024f9, type: 3}

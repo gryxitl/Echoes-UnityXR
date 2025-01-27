@@ -89,7 +89,7 @@ private bool IsMessageComplete(string message)
 #if !UNITY_WEBGL || UNITY_EDITOR
         // websocket.DispatchMessageQueue();
 #endif
-    if (Input.GetKeyDown(KeyCode.Space))
+    if (Input.GetKeyDown(KeyCode.Space) || OVRInput.GetUp(OVRInput.RawButton.A))
     {
         StartCoroutine(DecodeImage());   
     }

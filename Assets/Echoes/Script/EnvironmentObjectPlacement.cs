@@ -61,6 +61,8 @@ namespace Meta.XR.MRUtilityKit
         private Pose? _environmentPose;
         private EnvironmentRaycastHitStatus _currentEnvHitStatus;
 
+        [SerializeField] private GameObject scanObject;
+
         private IEnumerator Start()
         {
             // Wait until headset starts tracking and place the panel in front of the user
@@ -176,7 +178,8 @@ namespace Meta.XR.MRUtilityKit
                 _targetPose.position = _panel.position;
                 _targetPose.rotation = _panel.rotation;
 
-                SpawnInitObjectOnKeyWall();
+                // SpawnInitObjectOnKeyWall();
+                InitObjectOnKeyWall();
             }
             // AnimatePanelPose();
         }
@@ -194,9 +197,14 @@ namespace Meta.XR.MRUtilityKit
 
                 go.transform.SetLocalPositionAndRotation(Vector3.zero, quaternion.identity);
 
-
         }
-        private Ray GetRaycastRay()
+        private void InitObjectOnKeyWall()
+        {
+                var wallScale = Vector2.zero;
+                var keyWall = MRUK.Instance?.GetCurrentRoom()?.GetKeyWall(out wallScale);
+                scanObject.transform.SetLocalPositionAndRotation(Vector3.zero, quaternion.identity);
+
+        }        private Ray GetRaycastRay()
         {
             return new Ray(_raycastAnchor.position + _raycastAnchor.forward * 0.1f, _raycastAnchor.forward);
         }
