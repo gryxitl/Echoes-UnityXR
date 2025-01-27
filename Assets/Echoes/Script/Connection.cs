@@ -19,6 +19,12 @@ public class Connection : MonoBehaviour
         private List<string> messages = new List<string>();
         private string lastMessage;
 
+        [SerializeField]
+        private string targetIP;
+        [SerializeField]
+        private string targetPort;
+
+        private bool readyToProcess = false;
         private StringBuilder messageBuffer = new StringBuilder();
 
 
@@ -29,7 +35,9 @@ public class Connection : MonoBehaviour
         // TextToImage(jsonObj);
 
         // websocket = new WebSocket("ws://localhost:3000");
-        websocket = new WebSocket("ws://192.168.137.1:9982");
+        websocket = new WebSocket($"ws://{targetIP}:{targetPort}");
+
+        // websocket = new WebSocket("ws://192.168.137.1:9982");
 
         websocket.OnOpen += () =>
         {
@@ -63,6 +71,7 @@ public class Connection : MonoBehaviour
                      messageBuffer.Clear();
 
             messages.Add(completeMessage);
+            readyToProcess = true;
             }
 
             // logger.LogInfo(message);
@@ -89,9 +98,10 @@ private bool IsMessageComplete(string message)
 #if !UNITY_WEBGL || UNITY_EDITOR
         // websocket.DispatchMessageQueue();
 #endif
-    if (Input.GetKeyDown(KeyCode.Space) || OVRInput.GetUp(OVRInput.RawButton.A))
+    if (readyToProcess)
     {
         StartCoroutine(DecodeImage());   
+        readyToProcess = !readyToProcess;
     }
 
     }

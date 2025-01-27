@@ -22598,6 +22598,14 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1535779056}
     - target: {fileID: 3835282258103557030, guid: 4e8924de35b944deb929a66ffe64fa99, type: 3}
+      propertyPath: targetIP
+      value: 192.168.137.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3835282258103557030, guid: 4e8924de35b944deb929a66ffe64fa99, type: 3}
+      propertyPath: targetPort
+      value: 9982
+      objectReference: {fileID: 0}
+    - target: {fileID: 3835282258103557030, guid: 4e8924de35b944deb929a66ffe64fa99, type: 3}
       propertyPath: targetRenderer
       value: 
       objectReference: {fileID: 8041771762353705899}

@@ -145,29 +145,29 @@ namespace Meta.XR.MRUtilityKit
             if (OVRInput.GetUp(_snapButton))
             {
 
-                logger.LogInfo("Attempting to snap");
+                // logger.LogInfo("Attempting to snap");
                 //Get environment raycast
-                var snapRay = GetRaycastRay();
-                EnvironmentRaycastHit envRay = new EnvironmentRaycastHit();
-                _raycastManager.Raycast(snapRay, out envRay);
+                // var snapRay = GetRaycastRay();
+                // EnvironmentRaycastHit envRay = new EnvironmentRaycastHit();
+                // _raycastManager.Raycast(snapRay, out envRay);
                 
                 //Anchor raycast
-                var anchorRay = GetRaycastRay();
-                RaycastHit hit = new RaycastHit();
-                MRUKAnchor hitAnchor = new MRUKAnchor();
-                currentRoom.Raycast(anchorRay, math.INFINITY, out hit, out hitAnchor);
+                // var anchorRay = GetRaycastRay();
+                // RaycastHit hit = new RaycastHit();
+                // MRUKAnchor hitAnchor = new MRUKAnchor();
+                // currentRoom.Raycast(anchorRay, math.INFINITY, out hit, out hitAnchor);
                 
-                logger.LogInfo("Raycasting room");
-                GameObject go = Instantiate(spawnable, Vector3.zero, Quaternion.identity, hitAnchor.transform);
+                // logger.LogInfo("Raycasting room");
+                // GameObject go = Instantiate(spawnable, Vector3.zero, Quaternion.identity, hitAnchor.transform);
 
-                go.transform.SetLocalPositionAndRotation(Vector3.zero, quaternion.identity);
+                // go.transform.SetLocalPositionAndRotation(Vector3.zero, quaternion.identity);
 
-                logger.LogInfo($"{hitAnchor.name}");
+                // logger.LogInfo($"{hitAnchor.name}");
 
-                _panel.transform.SetParent(hitAnchor.transform);
-                _panel.SetLocalPositionAndRotation(Vector3.zero, quaternion.identity);
+                // _panel.transform.SetParent(hitAnchor.transform);
+                // _panel.SetLocalPositionAndRotation(Vector3.zero, quaternion.identity);
 
-//START SHIT BACK UP
+    //START SHIT BACK UP
                 // var snapPose = TryGetEnvironmentPose();
                 // Pose myPose = new Pose();
                 // if (snapPose.HasValue)
@@ -175,8 +175,8 @@ namespace Meta.XR.MRUtilityKit
                 //     myPose = snapPose.Value;
                 // }
                 // _panel.SetPositionAndRotation(envRay.point, myPose.rotation);
-                _targetPose.position = _panel.position;
-                _targetPose.rotation = _panel.rotation;
+                // _targetPose.position = _panel.position;
+                // _targetPose.rotation = _panel.rotation;
 
                 // SpawnInitObjectOnKeyWall();
                 InitObjectOnKeyWall();
